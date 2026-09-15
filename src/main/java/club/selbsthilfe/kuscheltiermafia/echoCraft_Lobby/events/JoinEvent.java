@@ -1,5 +1,6 @@
 package club.selbsthilfe.kuscheltiermafia.echoCraft_Lobby.events;
 
+import club.selbsthilfe.kuscheltiermafia.echoCraft_Lobby.EchoCraft_Lobby;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Particle;
@@ -10,6 +11,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class JoinEvent implements Listener {
+
+    private final EchoCraft_Lobby plugin;
+
+    public JoinEvent (EchoCraft_Lobby plugin){
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
@@ -25,13 +32,13 @@ public class JoinEvent implements Listener {
                 .build();
         event.joinMessage(joinMessage);
 
-
+        String spawn_point_tag = plugin.getConfig().getString("entity-tags.spawn", "spawn_point");
         Component noSpawnpoint = Component.translatable()
                 .key("error.NoSpawnPoint")
                 .fallback("No spawn point found. Please contact the server administrator!")
                 .build();
         world.getEntities().stream()
-                .filter(entity -> entity.getScoreboardTags().contains("spawn_point"))
+                .filter(entity -> entity.getScoreboardTags().contains(spawn_point_tag))
                 .findFirst()
                 .ifPresentOrElse(
                         spawn_marker -> player.teleport(spawn_marker.getLocation()),

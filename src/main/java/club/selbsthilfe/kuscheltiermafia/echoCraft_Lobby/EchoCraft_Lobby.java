@@ -5,7 +5,6 @@ import club.selbsthilfe.kuscheltiermafia.echoCraft_Lobby.events.LeaveEvent;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationStore;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,21 +18,18 @@ public final class EchoCraft_Lobby extends JavaPlugin {
     public void onEnable() {
         this.getLogger().info("EchoCraft_Lobby enabled! Beep boop beep beep boop!");
 
+        saveDefaultConfig();
         registerTranslations();
 
         PluginManager pluginManager = getServer().getPluginManager();
 
-        pluginManager.registerEvents(new JoinEvent(), this);
+        pluginManager.registerEvents(new JoinEvent(this), this);
         pluginManager.registerEvents(new LeaveEvent(), this);
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-    }
-
-    public Plugin getPlugin(){
-        return this;
     }
 
     private void registerTranslations(){
