@@ -1,1 +1,2 @@
-rootProject.name = "EchoCraft_Lobby"
+rootProject.name = "EchoCraft_Experience"
+include("lobby")
