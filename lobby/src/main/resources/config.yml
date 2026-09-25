@@ -1,2 +1,10 @@
 entity-tags:
   spawn: "spawn_point"
+
+#Don't fill this in for code in VCS
+database:
+  host:
+  port:
+  name:
+  username:
+  password:

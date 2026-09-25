@@ -9,8 +9,13 @@ repositories {
     mavenCentral()
 }
 
+val paperApiVersion = extra["paperApiVersion"] as String
+
 dependencies {
-    paperweight.paperDevBundle("26.2.build.+")
+    paperweight.paperDevBundle(paperApiVersion)
+
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation(project(":commons"))
 }
 
 paperPluginYaml {
