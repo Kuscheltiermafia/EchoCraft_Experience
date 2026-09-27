@@ -26,7 +26,7 @@ public class JoinEvent implements Listener {
 
         Component joinMessage = Component.translatable()
                 .key("player.event.join")
-                .color(NamedTextColor.YELLOW)
+                .color(NamedTextColor.AQUA)
                 .fallback("{0} has joined the lobby")
                 .arguments(player.displayName())
                 .build();
