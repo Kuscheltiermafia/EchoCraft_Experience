@@ -9,8 +9,23 @@ repositories {
     mavenCentral()
 }
 
+val paperApiVersion = extra["paperApiVersion"] as String
+var testcontainersVersion = extra["testcontainersVersion"] as String
+
 dependencies {
-    paperweight.paperDevBundle("26.2.build.+")
+    paperweight.paperDevBundle(paperApiVersion)
+
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation(project(":commons"))
+
+    testImplementation(project(":migrations"))
+
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testcontainersVersion")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 paperPluginYaml {
@@ -24,6 +39,8 @@ paperPluginYaml {
     prefix = "EchoCraft Lobby"
 }
 
+
+
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
 }
@@ -31,5 +48,14 @@ java {
 tasks {
     runServer {
         minecraftVersion("26.2")
+    }
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
     }
 }

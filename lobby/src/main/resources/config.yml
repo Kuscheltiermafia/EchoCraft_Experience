@@ -1,2 +1,10 @@
-entity-tags:
-  spawn: "spawn_point"
+entity-tags:  #Tags of the entities that mark places
+  spawn: "spawn_point"  #Where a player gets teleported upon joining the Lobby
+
+#Don't fill this in for code in VCS
+database:
+  host:
+  port:
+  name:
+  username:
+  password:
