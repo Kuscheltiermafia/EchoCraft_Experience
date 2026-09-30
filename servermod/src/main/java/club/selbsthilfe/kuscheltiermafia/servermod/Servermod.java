@@ -13,6 +13,7 @@ public class Servermod implements ModInitializer {
     public void onInitialize() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 spawnParticles(handler.player));
+        ServerP
     }
 
     private void spawnParticles(ServerPlayer player) {

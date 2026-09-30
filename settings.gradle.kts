@@ -1,3 +1,8 @@
+rootProject.name = "EchoCraft_Experience"
+include("lobby")
+include("migrations")
+include("commons")
+include("servermod")
 pluginManagement {
     repositories {
         maven("https://maven.fabricmc.net/")
@@ -13,7 +18,3 @@ pluginManagement {
         }
     }
 }
-
-rootProject.name = "EchoCraft_Experience"
-include("lobby")
-include("servermod")
