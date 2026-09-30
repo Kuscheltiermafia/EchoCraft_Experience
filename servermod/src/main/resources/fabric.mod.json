@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "servermod",
+  "version": "${version}",
+
+  "name": "servermod",
+  "description": "",
+  "authors": [],
+  "contact": {},
+
+  "license": "All-Rights-Reserved",
+  "icon": "assets/servermod/icon.png",
+
+  "environment": "server",
+  "entrypoints": {
+    "fabric-datagen": ["club.selbsthilfe.kuscheltiermafia.servermod.client.ServermodDataGenerator"],
+    "main": ["club.selbsthilfe.kuscheltiermafia.servermod.Servermod"]
+  },
+
+  "mixins": [
+    "servermod.mixins.json"
+    ,{
+      "config": "servermod.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
