@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS wardrobe (
     player_uuid uuid NOT NULL,
     cosmetic_key varchar(255) NOT NULL,
-    is_equipped bool NOT NULL,
+    is_equipped bool NOT NULL DEFAULT false,
     PRIMARY KEY (player_uuid, cosmetic_key)
 );
 

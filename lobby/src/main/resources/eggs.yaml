@@ -1,0 +1,13 @@
+# List findable eggs here
+# Each egg needs to be a minecraft:interactable with the tag specified here
+# Configure tags like "egg", "event:[event]", "id:[ID]"
+# Configure config like
+# [event]:
+#   reward: [cosmetic_id]
+#   egg_ids:
+#     - [first ID]
+#     - [second ID]
+#     - [third ID]
+# ...
+
+

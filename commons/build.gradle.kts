@@ -11,9 +11,12 @@ repositories {
 }
 
 val paperApiVersion = extra["paperApiVersion"] as String
+val postgresVersion = extra["postgresVersion"] as String
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:$paperApiVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.zaxxer:HikariCP:7.1.0")
 
     testImplementation(platform("org.junit:junit-bom:6.0.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
