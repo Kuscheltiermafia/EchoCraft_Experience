@@ -9,7 +9,7 @@ public class MigrationService {
         migrate(args);
     }
 
-    static MigrateResult migrate(String[] args) {
+    public static MigrateResult migrate(String[] args) {
 
         if (args.length != 3) {
             System.out.println("Please provide url, user and password as arguments in this order");

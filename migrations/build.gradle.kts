@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("java-library")
     id("application")
 }
 
@@ -8,12 +8,13 @@ repositories {
 }
 
 var flywayVersion = "13.7.0"
-var testcontainersVersion = "2.0.5"
+var testcontainersVersion = extra["testcontainersVersion"] as String
+val postgresVersion = extra["postgresVersion"] as String
 
 dependencies {
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    api("org.flywaydb:flyway-core:$flywayVersion")
     runtimeOnly("org.flywaydb:flyway-database-postgresql:$flywayVersion")
-    runtimeOnly("org.postgresql:postgresql:42.7.13")
+    runtimeOnly("org.postgresql:postgresql:$postgresVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")

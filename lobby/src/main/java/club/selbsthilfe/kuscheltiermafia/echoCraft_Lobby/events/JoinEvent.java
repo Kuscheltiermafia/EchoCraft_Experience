@@ -26,14 +26,14 @@ public class JoinEvent implements Listener {
 
         Component joinMessage = Component.translatable()
                 .key("player.event.join")
-                .color(NamedTextColor.YELLOW)
+                .color(NamedTextColor.AQUA)
                 .fallback("{0} has joined the lobby")
                 .arguments(player.displayName())
                 .build();
         event.joinMessage(joinMessage);
 
         String spawn_point_tag = plugin.getConfig().getString("entity-tags.spawn", "spawn_point");
-        Component noSpawnpoint = Component.translatable()
+        Component noSpawnPoint = Component.translatable()
                 .key("error.NoSpawnPoint")
                 .fallback("No spawn point found. Please contact the server administrator!")
                 .build();
@@ -42,7 +42,7 @@ public class JoinEvent implements Listener {
                 .findFirst()
                 .ifPresentOrElse(
                         spawn_marker -> player.teleport(spawn_marker.getLocation()),
-                        () -> player.sendMessage(noSpawnpoint)
+                        () -> player.sendMessage(noSpawnPoint)
                 )
         ;
 
