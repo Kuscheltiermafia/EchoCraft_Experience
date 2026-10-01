@@ -11,6 +11,7 @@ repositories {
 
 val paperApiVersion = extra["paperApiVersion"] as String
 var testcontainersVersion = extra["testcontainersVersion"] as String
+var flywayVersion = "13.7.0"
 
 dependencies {
     paperweight.paperDevBundle(paperApiVersion)
@@ -24,6 +25,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainersVersion")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testcontainersVersion")
+    testImplementation("org.flywaydb:flyway-core:$flywayVersion")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

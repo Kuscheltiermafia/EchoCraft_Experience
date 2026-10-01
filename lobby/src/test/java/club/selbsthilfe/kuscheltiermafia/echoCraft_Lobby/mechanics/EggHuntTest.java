@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class EggHuntTest {
 
     @Container
-    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:18-alpine");
+    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:17-alpine");
 
     private static DatabaseManager databaseManager;
     private static final YamlConfiguration egg_config = YamlConfiguration.loadConfiguration(

@@ -11,7 +11,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 public class TestMigration {
 
     @Container
-    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:18-alpine");
+    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:17-alpine");
 
     @Test
     public void migrateDatabase() {

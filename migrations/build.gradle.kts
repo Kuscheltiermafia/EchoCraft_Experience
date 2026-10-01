@@ -1,5 +1,5 @@
 plugins {
-    id("java-library")
+    id("java")
     id("application")
 }
 
@@ -12,7 +12,7 @@ var testcontainersVersion = extra["testcontainersVersion"] as String
 val postgresVersion = extra["postgresVersion"] as String
 
 dependencies {
-    api("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
     runtimeOnly("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     runtimeOnly("org.postgresql:postgresql:$postgresVersion")
 
@@ -33,7 +33,12 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
-tasks.named<Test>("test") {
+
+application {
+    mainClass.set("club.selbsthilfe.kuscheltiermafia.ec_db_migrations.MigrationService")
+}
+
+tasks.test {
     useJUnitPlatform()
 
     testLogging {
