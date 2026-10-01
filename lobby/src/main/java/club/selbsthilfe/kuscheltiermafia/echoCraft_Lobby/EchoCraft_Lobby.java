@@ -18,12 +18,12 @@ public final class EchoCraft_Lobby extends JavaPlugin {
     public void onEnable() {
         this.getLogger().info("EchoCraft_Lobby enabled! Beep boop beep beep boop!");
 
-        Configuration.registerTranslations();
-        DatabaseManager databaseManager = new DatabaseManager(getConfig().getString("host"), getConfig().getString("port"), getConfig().getString("database"), getConfig().getString("username"), getConfig().getString("password"));
-
         saveDefaultConfig();
         File egg_config_file = new File(this.getDataFolder(), "eggs.yaml");
         YamlConfiguration egg_config = YamlConfiguration.loadConfiguration(egg_config_file);
+
+        Configuration.registerTranslations();
+        DatabaseManager databaseManager = new DatabaseManager(getConfig().getString("database.host"), getConfig().getString("database.port"), getConfig().getString("database.database"), getConfig().getString("database.username"), getConfig().getString("database.password"));
 
         PluginManager pluginManager = getServer().getPluginManager();
 
