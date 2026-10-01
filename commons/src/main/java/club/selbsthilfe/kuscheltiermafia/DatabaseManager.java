@@ -13,6 +13,10 @@ public class DatabaseManager {
     public DatabaseManager(String host, String port, String database, String username, String password) {
 
         HikariConfig config = new HikariConfig();
+
+        //Ik this looks wierd but paper is a bitch sometimes
+        config.setDriverClassName("org.postgresql.Driver");
+
         config.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", host, port, database));
         config.setUsername(username);
         config.setPassword(password);
