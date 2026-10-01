@@ -3,6 +3,8 @@ plugins {
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.23"
     id("xyz.jpenilla.run-paper") version "3.1.0"
     id("xyz.jpenilla.resource-factory-paper-convention") version "1.3.1"
+
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 repositories {
@@ -60,4 +62,16 @@ tasks.named<Test>("test") {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("") // Ersetzt die normale JAR durch das Shadow-JAR
+
+    // Verhindert Service-Datei-Konflikte (falls du Flyway/exp4j etc. in commons nutzt)
+    mergeServiceFiles()
+}
+
+// Stellt sicher, dass bei './gradlew build' immer das Shadow-JAR erzeugt wird
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }

@@ -5,6 +5,6 @@ entity-tags:  #Tags of the entities that mark places
 database:
   host:
   port:
-  name:
+  database:
   username:
   password:
