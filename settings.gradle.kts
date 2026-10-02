@@ -3,6 +3,7 @@ include("lobby")
 include("migrations")
 include("commons")
 include("servermod")
+include("displayplugin")
 pluginManagement {
     repositories {
         maven("https://maven.fabricmc.net/")

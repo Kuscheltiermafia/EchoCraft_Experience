@@ -1,7 +1,7 @@
 plugins {
     id("java-library")
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.23"
-    id("xyz.jpenilla.run-paper") version "3.1.0"
+    //id("xyz.jpenilla.run-paper") version "3.1.0"
     id("xyz.jpenilla.resource-factory-paper-convention") version "1.3.1"
 
     id("com.gradleup.shadow") version "9.6.1"
@@ -50,9 +50,9 @@ java {
 }
 
 tasks {
-    runServer {
-        minecraftVersion("26.2")
-    }
+    //runServer {
+    //    minecraftVersion("26.2")
+    //}
 }
 
 tasks.named<Test>("test") {
