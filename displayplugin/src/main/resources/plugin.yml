@@ -1,0 +1,9 @@
+name: displayplugin
+prefix: [DisplayPlugin]
+version: '${version}'
+
+main: club.kuscheltiermafia.displayplugin.Displayplugin
+api-version: '1.21.10'
+load: POSTWORLD
+
+
