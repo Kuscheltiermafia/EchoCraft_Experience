@@ -45,18 +45,26 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation(project(":commons"))
+    // Package the shared database code and its connection pool in the mod JAR.
+    include(project(":commons"))
+    include "com.zaxxer:HikariCP:7.1.0"
+
+    testImplementation(project(":migrations"))
 }
 
+def resourceProperties = [
+        version          : project.version,
+        minecraft_version: project.minecraft_version,
+        loader_version   : project.loader_version
+]
+
 processResources {
-    inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.loader_version
+    inputs.properties resourceProperties
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
+        expand resourceProperties
     }
 }
 
