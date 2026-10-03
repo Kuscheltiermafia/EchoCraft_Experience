@@ -37,14 +37,14 @@ public class InteractEntityEvent implements Listener {
 
             if (eggHuntResult.isNew()) {
                 player.sendMessage(Component.translatable()
-                        .key("egghunt.alreadyFound")
-                        .fallback("You already found this secret.")
+                        .key("egghunt.foundEgg")
+                        .fallback("You found a secret!")
                         .build())
                 ;
             } else {
                 player.sendMessage(Component.translatable()
-                        .key("egghunt.foundEgg")
-                        .fallback("You found a secret!")
+                        .key("egghunt.alreadyFound")
+                        .fallback("You already found this secret.")
                         .build())
                 ;
             }
@@ -54,7 +54,7 @@ public class InteractEntityEvent implements Listener {
                     .arguments(Component.text(eggHuntResult.found()), Component.text(eggHuntResult.available()))
                     .build());
 
-            if (eggHuntResult.found() == eggHuntResult.available()){
+            if (eggHuntResult.found() == eggHuntResult.available() && eggHuntResult.new_cosmetic()) {
                 player.sendMessage(Component.translatable()
                         .key("cosmetic.new")
                         .fallback("You got a new cosmetic. Check out the menu to learn more!")
