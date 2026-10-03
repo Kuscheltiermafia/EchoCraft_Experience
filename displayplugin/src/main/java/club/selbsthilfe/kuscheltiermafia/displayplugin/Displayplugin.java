@@ -58,7 +58,7 @@ public final class Displayplugin extends JavaPlugin {
     }
 
     public void spawnParticles(Player player, Particle particle, double x, double y, double z, int count, float xDist, float yDist, float zDist, float speed){
-        player.spawnParticle(particle, x,y,z,count,xDist,yDist,zDist,speed);
+        player.getWorld().spawnParticle(particle, x,y,z,count,xDist,yDist,zDist,speed);
     }
 
     @Override

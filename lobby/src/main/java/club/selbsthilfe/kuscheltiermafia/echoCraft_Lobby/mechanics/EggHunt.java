@@ -3,6 +3,8 @@ package club.selbsthilfe.kuscheltiermafia.echoCraft_Lobby.mechanics;
 import club.selbsthilfe.kuscheltiermafia.DatabaseManager;
 import club.selbsthilfe.kuscheltiermafia.Utils;
 import club.selbsthilfe.kuscheltiermafia.echoCraft_Lobby.helper.EggHuntResult;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -29,9 +31,9 @@ public class EggHunt {
 
 
         if (success == 1){
-            return new EggHuntResult(true, found, available);
+            return new EggHuntResult(true, found, available, eggsFound.new_cosmetic());
         }else{
-            return new EggHuntResult(false, found, available);
+            return new EggHuntResult(false, found, available, eggsFound.new_cosmetic());
         }
     }
 
@@ -47,7 +49,13 @@ public class EggHunt {
 
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Bukkit.getPlayer(playerID).sendMessage(
+                    Component.translatable()
+                            .key("cosmetic.finished")
+                            .fallback("§8You already finished this event!")
+                            .build()
+            );
+            return 0;
         }
 
     }
@@ -73,6 +81,7 @@ public class EggHunt {
     static EggHuntResult getTotalEggsFound(DatabaseManager databaseManager, YamlConfiguration egg_config, UUID uuid, String event){
         int found = 0;
         int available = 0;
+        int new_cos = 0;
 
         String sql_get = "SELECT COUNT(*) FROM egghunt WHERE player_uuid = ? AND event = ?;";
 
@@ -88,14 +97,18 @@ public class EggHunt {
                     available = egg_config.getStringList(event + ".egg_ids").size();
 
                     if (found >= available){
-                        giveReward(uuid, event, databaseManager, egg_config);
+                        new_cos = giveReward(uuid, event, databaseManager, egg_config);
                     }
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return new EggHuntResult(true, found, available);
+        if (new_cos == 1) {
+            return new EggHuntResult(true, found, available, true);
+        }else {
+            return new EggHuntResult(true, found, available, false);
+        }
     }
 
 }
