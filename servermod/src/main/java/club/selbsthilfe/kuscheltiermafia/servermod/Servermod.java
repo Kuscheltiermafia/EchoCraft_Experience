@@ -9,9 +9,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import club.selbsthilfe.kuscheltiermafia.DatabaseManager;
+import net.minecraft.world.effect.MobEffect;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,7 +41,7 @@ public class Servermod implements ModInitializer {
         }
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
-                join(handler.player));
+                join(handler.player, server));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
                 cosmeticManagers.remove(handler.player.getUUID()));
         CommandRegistrationCallback.EVENT.register(
@@ -81,8 +83,8 @@ public class Servermod implements ModInitializer {
     }
 
 
-    private void join(ServerPlayer player){
-        CosmeticManager cosmeticManager = new CosmeticManager(player);
+    private void join(ServerPlayer player, MinecraftServer server){
+        CosmeticManager cosmeticManager = new CosmeticManager(player, server);
 
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(
@@ -103,8 +105,14 @@ public class Servermod implements ModInitializer {
     private void tickEquippedCosmetics(CosmeticManager cosmeticManager) {
         for (String cosmeticKey : cosmeticManager.cosmetics) {
             if ("soultrails".equals(cosmeticKey)) {
-                spawnParticles(cosmeticManager.serverPlayer, ParticleTypes.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f,0.005f,0.01f, 0.02f);
+                if (cosmeticManager.serverPlayer.isInvisible()) {
+                    return;
+                } else if (!cosmeticManager.serverPlayer.gameMode().isSurvival() && !cosmeticManager.serverPlayer.gameMode().isCreative()) {
 
+                    return;
+                }else{
+                    spawnParticles(cosmeticManager.serverPlayer, ParticleTypes.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f, 0.005f, 0.01f, 0.02f);
+                }
             }
         }
     }
