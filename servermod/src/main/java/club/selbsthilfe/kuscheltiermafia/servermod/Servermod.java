@@ -9,13 +9,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import club.selbsthilfe.kuscheltiermafia.DatabaseManager;
+import club.selbsthilfe.kuscheltiermafia.CosmeticRepository;
+import net.minecraft.world.effect.MobEffect;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,9 @@ import java.util.UUID;
 public class Servermod implements ModInitializer {
     private int ticks = 0;
     DatabaseManager databaseManager;
+    private CosmeticRepository cosmeticRepository;
     private final Map<UUID, CosmeticManager> cosmeticManagers = new HashMap<>();
+    private CosmeticMenuHandler cosmeticMenuHandler;
 
     @Override
     public void onInitialize() {
@@ -38,12 +41,23 @@ public class Servermod implements ModInitializer {
             e.printStackTrace();
         }
 
+        cosmeticRepository = new CosmeticRepository(databaseManager);
+        cosmeticMenuHandler = new CosmeticMenuHandler(cosmeticRepository, cosmeticManagers);
+
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 join(handler.player));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
                 cosmeticManagers.remove(handler.player.getUUID()));
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> {
+                    dispatcher.register(
+                            Commands.literal("cosmetics")
+                                    .executes(context -> {
+                                        ServerPlayer player = context.getSource().getPlayerOrException();
+                                        cosmeticMenuHandler.open(player);
+                                        return Command.SINGLE_SUCCESS;
+                                    })
+                    );
                     dispatcher.register(
                             Commands.literal("hello")
                                     .executes(context -> {
@@ -84,15 +98,8 @@ public class Servermod implements ModInitializer {
     private void join(ServerPlayer player){
         CosmeticManager cosmeticManager = new CosmeticManager(player);
 
-        try (Connection connection = databaseManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT cosmetic_key FROM wardrobe WHERE player_uuid = ? AND is_equipped")) {
-            statement.setObject(1, player.getUUID());
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    cosmeticManager.cosmetics.add(resultSet.getString("cosmetic_key"));
-                }
-            }
+        try {
+            cosmeticManager.cosmetics.addAll(cosmeticRepository.loadEquippedKeys(player.getUUID()));
             cosmeticManagers.put(player.getUUID(), cosmeticManager);
         } catch (SQLException e) {
             System.err.println("Could not load equipped cosmetics for " + player.getName());
@@ -103,8 +110,13 @@ public class Servermod implements ModInitializer {
     private void tickEquippedCosmetics(CosmeticManager cosmeticManager) {
         for (String cosmeticKey : cosmeticManager.cosmetics) {
             if ("soultrails".equals(cosmeticKey)) {
-                spawnParticles(cosmeticManager.serverPlayer, ParticleTypes.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f,0.005f,0.01f, 0.02f);
-
+                if (cosmeticManager.serverPlayer.isInvisible()) {
+                    return;
+                } else if (!cosmeticManager.serverPlayer.gameMode().isSurvival() && !cosmeticManager.serverPlayer.gameMode().isCreative()) {
+                    return;
+                }else{
+                    spawnParticles(cosmeticManager.serverPlayer, ParticleTypes.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f, 0.005f, 0.01f, 0.02f);
+                }
             }
         }
     }
