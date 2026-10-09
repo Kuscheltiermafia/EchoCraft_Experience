@@ -1,5 +1,6 @@
 package club.selbsthilfe.kuscheltiermafia.servermod;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
