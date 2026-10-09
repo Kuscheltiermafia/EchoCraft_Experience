@@ -9,10 +9,8 @@ import java.util.List;
 public class CosmeticManager {
     public final ServerPlayer serverPlayer;
     public final List<String> cosmetics = new ArrayList<>();
-    public final MinecraftServer server;
 
-    public CosmeticManager(ServerPlayer serverPlayer, MinecraftServer server) {
+    public CosmeticManager(ServerPlayer serverPlayer) {
         this.serverPlayer = serverPlayer;
-        this.server = server;
     }
 }
