@@ -17,10 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class CosmeticMenuHandler implements Listener {
     private static final int MENU_SIZE = 27;
@@ -37,7 +34,7 @@ public class CosmeticMenuHandler implements Listener {
     }
 
     public void open(Player player) {
-        List<CosmeticEntry> entries;
+        HashMap<String, Boolean> entries;
         try {
             entries = cosmeticRepository.loadWardrobe(player.getUniqueId());
         } catch (SQLException e) {
@@ -100,10 +97,10 @@ public class CosmeticMenuHandler implements Listener {
     }
 
     private static final class CosmeticMenuHolder implements InventoryHolder {
-        private final List<CosmeticEntry> entries;
+        private final HashMap<String, Boolean> entries;
         private Inventory inventory;
 
-        private CosmeticMenuHolder(List<CosmeticEntry> entries) {
+        private CosmeticMenuHolder(HashMap<String, Boolean> entries) {
             this.entries = new ArrayList<>(entries.subList(0, Math.min(entries.size(), MENU_SIZE)));
         }
 

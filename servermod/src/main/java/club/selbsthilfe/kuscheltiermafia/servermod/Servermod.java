@@ -19,6 +19,7 @@ import net.minecraft.world.effect.MobEffect;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,6 +29,8 @@ public class Servermod implements ModInitializer {
     private CosmeticRepository cosmeticRepository;
     private final Map<UUID, CosmeticManager> cosmeticManagers = new HashMap<>();
     private CosmeticMenuHandler cosmeticMenuHandler;
+
+    private HashMap<ServerPlayer, List<String>> cosmeticManagerV2 = new HashMap<>();
 
     @Override
     public void onInitialize() {
@@ -47,7 +50,8 @@ public class Servermod implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 join(handler.player));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-                cosmeticManagers.remove(handler.player.getUUID()));
+                 cosmeticManagerV2.remove(handler.player));
+
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> {
                     dispatcher.register(
@@ -58,37 +62,12 @@ public class Servermod implements ModInitializer {
                                         return Command.SINGLE_SUCCESS;
                                     })
                     );
-                    dispatcher.register(
-                            Commands.literal("hello")
-                                    .executes(context -> {
-                                        context.getSource().sendSuccess(
-                                                () -> Component.literal("Hello!"),
-                                                false
-                                        );
-                                        CosmeticManager cosmeticManager = new CosmeticManager(context.getSource().getPlayer());
-                                        //cosmeticManager.cosmetics.add("flame");
-                                        cosmeticManager.cosmetics.add("soultrails");
-                                        cosmeticManagers.put(context.getSource().getPlayer().getUUID(), cosmeticManager);
-
-
-                                        return Command.SINGLE_SUCCESS;
-                                    })
-                    );
                 }
         );
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            //ticks++;
-
-            // Every 5 ticks = 0.25 seconds
-            //if (ticks < 5) {
-            //    return;
-            //}
-
-            //ticks = 0;
-
-            for (CosmeticManager cosmeticManager : cosmeticManagers.values()) {
-                tickEquippedCosmetics(cosmeticManager);
+            for (ServerPlayer player: cosmeticManagerV2.keySet()) {
+                tickEquippedCosmeticsV2(cosmeticManagerV2, player);
             }
         });
 
@@ -99,6 +78,7 @@ public class Servermod implements ModInitializer {
         CosmeticManager cosmeticManager = new CosmeticManager(player);
 
         try {
+            cosmeticManagerV2.put(player, cosmeticRepository.loadEquippedKeys(player.getUUID()));
             cosmeticManager.cosmetics.addAll(cosmeticRepository.loadEquippedKeys(player.getUUID()));
             cosmeticManagers.put(player.getUUID(), cosmeticManager);
         } catch (SQLException e) {
@@ -120,6 +100,22 @@ public class Servermod implements ModInitializer {
             }
         }
     }
+    private void tickEquippedCosmeticsV2(HashMap<ServerPlayer, List<String>> cosmeticManager, ServerPlayer player){
+        for (String cosmeticKey : cosmeticManager.get(player)){
+            if ("soultrails".equals(cosmeticKey)) {
+                if (player.isInvisible()) {
+                    return;
+                } else if (!player.gameMode().isSurvival() && !player.gameMode().isCreative()) {
+                    return;
+                } else {
+                    spawnParticles(player, ParticleTypes.SOUL, player.getX(), player.getY(), player.getZ(), 2, 0.01f, 0.005f, 0.01f, 0.02f);
+                }
+            }
+        }
+    }
+
+
+
 
     private void spawnParticles(ServerPlayer player, SimpleParticleType particleTypes,double x, double y, double z, int count, float xDist, float yDist, float zDist, float speed) {
         ServerLevel world = (ServerLevel) player.level();

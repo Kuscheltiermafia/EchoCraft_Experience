@@ -19,10 +19,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.SimpleMenuProvider;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class CosmeticMenuHandler {
     private static final int ROWS = 3;
@@ -30,21 +27,25 @@ public class CosmeticMenuHandler {
 
     private final CosmeticRepository cosmeticRepository;
     private final Map<UUID, CosmeticManager> cosmeticManagers;
+    private HashMap <ServerPlayer, HashMap<String, Boolean>> cosmeticManagerV2;
 
-    public CosmeticMenuHandler(CosmeticRepository cosmeticRepository, Map<UUID, CosmeticManager> cosmeticManagers) {
+
+    public CosmeticMenuHandler(CosmeticRepository cosmeticRepository, Map<UUID, CosmeticManager> cosmeticManagers, HashMap<ServerPlayer, HashMap<String, Boolean>> cosmeticManagerV2) {
         this.cosmeticRepository = cosmeticRepository;
         this.cosmeticManagers = cosmeticManagers;
+        this.cosmeticManagerV2 = cosmeticManagerV2;
     }
 
     public void open(ServerPlayer player) {
-        List<CosmeticEntry> entries = loadCosmetics(player);
+        HashMap<String, Boolean> entries = loadCosmetics(player);
+        cosmeticManagerV2.put(player, entries);
         player.openMenu(new SimpleMenuProvider(
                 (syncId, inventory, ignored) -> new CosmeticMenu(syncId, inventory, player, entries),
                 Component.literal("Cosmetics")
         ));
     }
 
-    private List<CosmeticEntry> loadCosmetics(ServerPlayer player) {
+    private HashMap<String, Boolean> loadCosmetics(ServerPlayer player) {
         try {
             return cosmeticRepository.loadWardrobe(player.getUUID());
         } catch (SQLException e) {
@@ -52,13 +53,18 @@ public class CosmeticMenuHandler {
             System.err.println("Could not load cosmetics for " + player.getName());
             e.printStackTrace();
         }
-        return List.of();
+        return null;
     }
 
-    private void setEquipped(ServerPlayer player, CosmeticEntry entry, boolean equipped) {
+    private void updateEquippedState(ServerPlayer player, HashMap<String, Boolean> entry, boolean equipped) {
         try {
-            cosmeticRepository.setEquipped(player.getUUID(), entry.key(), equipped);
+            cosmeticRepository.updateEquippedstate(player.getUUID(), entry.key(), equipped);
             CosmeticManager manager = cosmeticManagers.get(player.getUUID());
+
+            if (cosmeticManagerV2 != null){
+                cosmeticManagerV2.put(player, )
+            }
+
             if (manager != null) {
                 manager.cosmetics.remove(entry.key());
                 if (equipped) manager.cosmetics.add(entry.key());
@@ -72,9 +78,9 @@ public class CosmeticMenuHandler {
     private final class CosmeticMenu extends AbstractContainerMenu {
         private final ServerPlayer player;
         private final SimpleContainer container;
-        private final List<CosmeticEntry> entries;
+        private final HashMap<String, Boolean> entries;
 
-        private CosmeticMenu(int syncId, Inventory inventory, ServerPlayer player, List<CosmeticEntry> entries) {
+        private CosmeticMenu(int syncId, Inventory inventory, ServerPlayer player, HashMap<String, Boolean> entries) {
             super(MenuType.GENERIC_9x3, syncId);
             this.player = player;
             this.container = new SimpleContainer(COSMETICS_PER_PAGE);
@@ -95,9 +101,9 @@ public class CosmeticMenuHandler {
                     slots.get(slot).set(ItemStack.EMPTY);
                     continue;
                 }
-                CosmeticEntry entry = entries.get(slot);
-                ItemStack stack = new ItemStack(itemFor(entry.key()));
-                String status = entry.equipped() ? " (Aktiv)" : " (Deaktiviert)";
+                HashMap<String, Boolean> entry = entries.entrySet(slot);
+                ItemStack stack = new ItemStack(itemFor(entries));
+                String status = entries.get() ? " (Aktiv)" : " (Deaktiviert)";
                 stack.set(DataComponents.CUSTOM_NAME, Component.literal(displayName(entry.key()) + status)
                         .withStyle(entry.equipped() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
                 slots.get(slot).set(stack);
