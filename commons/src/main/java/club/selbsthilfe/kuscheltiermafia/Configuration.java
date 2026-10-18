@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class Configuration {
+    public static int cosmeticinventorysize = 3;
 
     public static void registerTranslations(){
         TranslationStore.StringBased<MessageFormat> store = TranslationStore.messageFormat(Key.key("echocraft.lang"));
@@ -20,5 +21,6 @@ public class Configuration {
 
         GlobalTranslator.translator().addSource(store);
     }
+
 
 }

@@ -56,7 +56,7 @@ public class CosmeticMenuHandler {
         return null;
     }
 
-    private void updateEquippedState(ServerPlayer player, HashMap<String, Boolean> entry, boolean equipped) {
+    private void updateEquippedState(ServerPlayer player, HashMap<String, Boolean> entrys, boolean equipped) {
         try {
             cosmeticRepository.updateEquippedstate(player.getUUID(), entry.key(), equipped);
             CosmeticManager manager = cosmeticManagers.get(player.getUUID());
@@ -101,7 +101,7 @@ public class CosmeticMenuHandler {
                     slots.get(slot).set(ItemStack.EMPTY);
                     continue;
                 }
-                HashMap<String, Boolean> entry = entries.entrySet(slot);
+                HashMap<String, Boolean> entry = entries.;
                 ItemStack stack = new ItemStack(itemFor(entries));
                 String status = entries.get() ? " (Aktiv)" : " (Deaktiviert)";
                 stack.set(DataComponents.CUSTOM_NAME, Component.literal(displayName(entry.key()) + status)
@@ -115,7 +115,7 @@ public class CosmeticMenuHandler {
             if (slot >= 0 && slot < entries.size()) {
                 CosmeticEntry entry = entries.get(slot);
                 boolean equipped = !entry.equipped();
-                setEquipped(player, entry, equipped);
+                updateEquippedState(player, entry, equipped);
                 entries.set(slot, new CosmeticEntry(entry.key(), equipped));
                 refreshItems();
                 broadcastChanges();

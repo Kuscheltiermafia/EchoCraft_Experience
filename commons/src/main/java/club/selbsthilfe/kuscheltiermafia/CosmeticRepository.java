@@ -28,7 +28,23 @@ public class CosmeticRepository {
         return cosmetics;
     }
 
-    public List<String> loadEquippedKeys(UUID playerUuid) throws SQLException {
+    public HashMap<String, Boolean> loadEqippedWardrobe(UUID playerUuid) throws SQLException {
+        HashMap<String, Boolean> equippedCosmetics = new HashMap<>();
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT cosmetic_key, is_equipped FROM wardrobe WHERE player_uuid = ? && is_equipped = 1 ORDER BY cosmetic_key")) {
+            statement.setObject(1, playerUuid);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    equippedCosmetics.put(resultSet.getString("cosmetic_key"), Boolean.valueOf(resultSet.getBoolean("is_equipped")));
+                }
+            }
+        }
+        return equippedCosmetics;
+    }
+
+    //discontinued
+    public HashMap loadEquippedKeys(UUID playerUuid) throws SQLException {
         return loadWardrobe(playerUuid).stream()
                 .filter(CosmeticEntry::equipped)
                 .map(CosmeticEntry::key)

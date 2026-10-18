@@ -30,7 +30,7 @@ public class Servermod implements ModInitializer {
     private final Map<UUID, CosmeticManager> cosmeticManagers = new HashMap<>();
     private CosmeticMenuHandler cosmeticMenuHandler;
 
-    private HashMap<ServerPlayer, List<String>> cosmeticManagerV2 = new HashMap<>();
+    private HashMap<ServerPlayer, HashMap<String, Boolean>> cosmeticManagerV2 = new HashMap<>();
 
     @Override
     public void onInitialize() {
