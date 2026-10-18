@@ -3,7 +3,9 @@ package club.selbsthilfe.kuscheltiermafia.displayplugin;
 import club.selbsthilfe.kuscheltiermafia.displayplugin.events.Join;
 import club.selbsthilfe.kuscheltiermafia.displayplugin.events.Left;
 import club.selbsthilfe.kuscheltiermafia.DatabaseManager;
+import club.selbsthilfe.kuscheltiermafia.CosmeticRepository;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -17,17 +19,29 @@ import java.util.UUID;
 public final class Displayplugin extends JavaPlugin {
 
     public DatabaseManager databaseManager;
+    public CosmeticRepository cosmeticRepository;
     public final Map<UUID, CosmeticManager> cosmeticManagers = new HashMap<>();
     @Override
     public void onEnable() {
         // Plugin startup logic
         saveDefaultConfig();
         databaseManager = new DatabaseManager(getConfig().getString("database.host"), getConfig().getString("database.port"), getConfig().getString("database.database"), getConfig().getString("database.username"), getConfig().getString("database.password"));
+        cosmeticRepository = new CosmeticRepository(databaseManager);
 
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new Join(this), this);
         pluginManager.registerEvents(new Left(this), this);
+        CosmeticMenuHandler cosmeticMenuHandler = new CosmeticMenuHandler(this, cosmeticRepository, cosmeticManagers);
+        pluginManager.registerEvents(cosmeticMenuHandler, this);
         startCosmeticTick();
+
+        registerCommand("cosmetics", (source, args) -> {
+            if (source.getSender() instanceof Player player) {
+                cosmeticMenuHandler.open(player);
+            } else {
+                source.getSender().sendMessage("Dieser Befehl kann nur von einem Spieler verwendet werden.");
+            }
+        });
 
         registerCommand("test", (source, args) -> {
             source.getSender().sendMessage("Hello!");
@@ -52,7 +66,13 @@ public final class Displayplugin extends JavaPlugin {
     public void tickEquippedCosmetics(CosmeticManager cosmeticManager) {
         for (String cosmeticKey : cosmeticManager.cosmetics) {
             if ("soultrails".equals(cosmeticKey)) {
-                spawnParticles(cosmeticManager.serverPlayer, Particle.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f,0.005f,0.01f, 0.02f);
+                if (cosmeticManager.serverPlayer.isInvisible()){
+                    return;
+                }else if (cosmeticManager.serverPlayer.getGameMode() == GameMode.SPECTATOR){
+                    return;
+                }else {
+                    spawnParticles(cosmeticManager.serverPlayer, Particle.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f, 0.005f, 0.01f, 0.02f);
+                }
             }
         }
     }

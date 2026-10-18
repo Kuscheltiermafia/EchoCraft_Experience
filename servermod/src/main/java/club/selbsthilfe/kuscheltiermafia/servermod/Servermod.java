@@ -9,22 +9,28 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import club.selbsthilfe.kuscheltiermafia.DatabaseManager;
+import club.selbsthilfe.kuscheltiermafia.CosmeticRepository;
+import net.minecraft.world.effect.MobEffect;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class Servermod implements ModInitializer {
     private int ticks = 0;
     DatabaseManager databaseManager;
+    private CosmeticRepository cosmeticRepository;
     private final Map<UUID, CosmeticManager> cosmeticManagers = new HashMap<>();
+    private CosmeticMenuHandler cosmeticMenuHandler;
+
+    private HashMap<ServerPlayer, HashMap<String, Boolean>> cosmeticManagerV2 = new HashMap<>();
 
     @Override
     public void onInitialize() {
@@ -38,25 +44,21 @@ public class Servermod implements ModInitializer {
             e.printStackTrace();
         }
 
+        cosmeticRepository = new CosmeticRepository(databaseManager);
+        cosmeticMenuHandler = new CosmeticMenuHandler(cosmeticRepository, cosmeticManagers);
+
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 join(handler.player));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-                cosmeticManagers.remove(handler.player.getUUID()));
+                 cosmeticManagerV2.remove(handler.player));
+
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> {
                     dispatcher.register(
-                            Commands.literal("hello")
+                            Commands.literal("cosmetics")
                                     .executes(context -> {
-                                        context.getSource().sendSuccess(
-                                                () -> Component.literal("Hello!"),
-                                                false
-                                        );
-                                        CosmeticManager cosmeticManager = new CosmeticManager(context.getSource().getPlayer());
-                                        //cosmeticManager.cosmetics.add("flame");
-                                        cosmeticManager.cosmetics.add("soultrails");
-                                        cosmeticManagers.put(context.getSource().getPlayer().getUUID(), cosmeticManager);
-
-
+                                        ServerPlayer player = context.getSource().getPlayerOrException();
+                                        cosmeticMenuHandler.open(player);
                                         return Command.SINGLE_SUCCESS;
                                     })
                     );
@@ -64,17 +66,8 @@ public class Servermod implements ModInitializer {
         );
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            //ticks++;
-
-            // Every 5 ticks = 0.25 seconds
-            //if (ticks < 5) {
-            //    return;
-            //}
-
-            //ticks = 0;
-
-            for (CosmeticManager cosmeticManager : cosmeticManagers.values()) {
-                tickEquippedCosmetics(cosmeticManager);
+            for (ServerPlayer player: cosmeticManagerV2.keySet()) {
+                tickEquippedCosmeticsV2(cosmeticManagerV2, player);
             }
         });
 
@@ -84,15 +77,9 @@ public class Servermod implements ModInitializer {
     private void join(ServerPlayer player){
         CosmeticManager cosmeticManager = new CosmeticManager(player);
 
-        try (Connection connection = databaseManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT cosmetic_key FROM wardrobe WHERE player_uuid = ? AND is_equipped")) {
-            statement.setObject(1, player.getUUID());
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    cosmeticManager.cosmetics.add(resultSet.getString("cosmetic_key"));
-                }
-            }
+        try {
+            cosmeticManagerV2.put(player, cosmeticRepository.loadEquippedKeys(player.getUUID()));
+            cosmeticManager.cosmetics.addAll(cosmeticRepository.loadEquippedKeys(player.getUUID()));
             cosmeticManagers.put(player.getUUID(), cosmeticManager);
         } catch (SQLException e) {
             System.err.println("Could not load equipped cosmetics for " + player.getName());
@@ -103,11 +90,32 @@ public class Servermod implements ModInitializer {
     private void tickEquippedCosmetics(CosmeticManager cosmeticManager) {
         for (String cosmeticKey : cosmeticManager.cosmetics) {
             if ("soultrails".equals(cosmeticKey)) {
-                spawnParticles(cosmeticManager.serverPlayer, ParticleTypes.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f,0.005f,0.01f, 0.02f);
-
+                if (cosmeticManager.serverPlayer.isInvisible()) {
+                    return;
+                } else if (!cosmeticManager.serverPlayer.gameMode().isSurvival() && !cosmeticManager.serverPlayer.gameMode().isCreative()) {
+                    return;
+                }else{
+                    spawnParticles(cosmeticManager.serverPlayer, ParticleTypes.SOUL, cosmeticManager.serverPlayer.getX(), cosmeticManager.serverPlayer.getY(), cosmeticManager.serverPlayer.getZ(), 2, 0.01f, 0.005f, 0.01f, 0.02f);
+                }
             }
         }
     }
+    private void tickEquippedCosmeticsV2(HashMap<ServerPlayer, List<String>> cosmeticManager, ServerPlayer player){
+        for (String cosmeticKey : cosmeticManager.get(player)){
+            if ("soultrails".equals(cosmeticKey)) {
+                if (player.isInvisible()) {
+                    return;
+                } else if (!player.gameMode().isSurvival() && !player.gameMode().isCreative()) {
+                    return;
+                } else {
+                    spawnParticles(player, ParticleTypes.SOUL, player.getX(), player.getY(), player.getZ(), 2, 0.01f, 0.005f, 0.01f, 0.02f);
+                }
+            }
+        }
+    }
+
+
+
 
     private void spawnParticles(ServerPlayer player, SimpleParticleType particleTypes,double x, double y, double z, int count, float xDist, float yDist, float zDist, float speed) {
         ServerLevel world = (ServerLevel) player.level();
